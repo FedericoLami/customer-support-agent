@@ -16,4 +16,6 @@ respuesta — lo que redactó el redactor
 respuesta_final — lo que aprobó el revisor
 
 
-estado.py porque es la base de todo el sistema — define qué información viaja entre los nodos.
+estado.py 
+
+es la base de todo el sistema — define qué información viaja entre los nodos.
