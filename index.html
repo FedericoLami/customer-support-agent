@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centro de Atención al Cliente — AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --border: #e2e8f0;
+      --border-2: #cbd5e1;
+      --text: #0f172a;
+      --text-2: #475569;
+      --text-3: #94a3b8;
+      --accent: #4f46e5;
+      --accent-light: #eef2ff;
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      height: 60px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      background: var(--accent);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .brand-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .brand-sub {
+      font-size: 0.68rem;
+      color: var(--text-3);
+      font-family: var(--mono);
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--success);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .progress {
+      height: 2px;
+      background: var(--border);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0;
+    }
+
+    .progress-fill.active {
+      animation: prog 1.5s ease-in-out infinite;
+    }
+
+    @keyframes prog {
+      0% { transform: translateX(-100%); width: 60%; }
+      100% { transform: translateX(200%); width: 60%; }
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .sidebar-block {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .block-title {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 1rem;
+    }
+
+    /* Pipeline */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .pipeline::before {
+      content: '';
+      position: absolute;
+      left: 11px;
+      top: 24px;
+      bottom: 24px;
+      width: 1px;
+      background: var(--border-2);
+    }
+
+    .pipeline-node {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+      padding: 0.6rem 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .node-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      border: 1.5px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .node-name {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 0.1rem;
+    }
+
+    .node-desc {
+      font-size: 0.67rem;
+      color: var(--text-3);
+      line-height: 1.4;
+    }
+
+    /* Categorías */
+    .cat-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.45rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    .cat-pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .cat-label {
+      font-size: 0.73rem;
+      color: var(--text-2);
+    }
+
+    /* Métricas */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .metric-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .metric-label {
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-value {
+      font-family: var(--mono);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .metric-value.accent { color: var(--accent); }
+    .metric-value.warn { color: var(--warning); }
+
+    /* Sugerencias */
+    .sugg-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .sugg {
+      padding: 0.55rem 0.75rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: 0.73rem;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.4;
+    }
+
+    .sugg:hover {
+      background: var(--accent-light);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Main */
+    .main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.75rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      min-height: 0;
+      scroll-behavior: smooth;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.75rem;
+      padding: 4rem;
+    }
+
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.25rem; }
+
+    .empty-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-2);
+    }
+
+    .empty-sub {
+      font-size: 0.78rem;
+      color: var(--text-3);
+      max-width: 300px;
+      line-height: 1.7;
+    }
+
+    /* Messages */
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      animation: fadein 0.2s ease;
+    }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .msg-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+
+    .msg-avatar.user { background: var(--surface-2); border: 1px solid var(--border-2); }
+    .msg-avatar.agent { background: var(--accent); }
+
+    .msg-role {
+      font-size: 0.65rem;
+      font-family: var(--mono);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .msg-bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1.15rem;
+      font-size: 0.84rem;
+      line-height: 1.75;
+      color: var(--text);
+      max-width: 720px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .message.user .msg-bubble {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      align-self: flex-end;
+      max-width: 520px;
+    }
+
+    .message.agent .msg-bubble {
+      border-left: 3px solid var(--accent);
+    }
+
+    .typing-wrap {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      padding: 0.15rem 0;
+    }
+
+    .t-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: tdot 1.2s ease-in-out infinite;
+    }
+
+    .t-dot:nth-child(2) { animation-delay: 0.2s; }
+    .t-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes tdot {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.35; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    .error-bubble {
+      background: #fef2f2;
+      border: 1px solid rgba(220,38,38,0.2);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-size: 0.78rem;
+      color: var(--danger);
+      font-family: var(--mono);
+    }
+
+    /* Input */
+    .input-bar {
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      background: var(--surface);
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      flex-shrink: 0;
+    }
+
+    .input-wrap { flex: 1; }
+
+    textarea {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.84rem;
+      line-height: 1.6;
+      padding: 0.7rem 1rem;
+      resize: none;
+      height: 46px;
+      max-height: 140px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--text-3); }
+
+    .input-hint {
+      font-size: 0.62rem;
+      color: var(--text-3);
+      margin-top: 0.35rem;
+      font-family: var(--mono);
+    }
+
+    .btn-send {
+      width: 46px;
+      height: 46px;
+      background: var(--accent);
+      border: none;
+      border-radius: 9px;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+
+    .btn-send:hover { opacity: 0.85; }
+    .btn-send:active { transform: scale(0.96); }
+    .btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">🎧</div>
+    <div>
+      <div class="brand-name">Centro de Atención al Cliente</div>
+      <div class="brand-sub">LangGraph · 4 agentes · Claude Haiku</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    sistema activo
+  </div>
+</header>
+
+<div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+
+<div class="layout">
+  <aside class="sidebar">
+
+    <div class="sidebar-block">
+      <div class="block-title">Métricas de sesión</div>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Total</div>
+          <div class="metric-value accent" id="mTotal">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Spam</div>
+          <div class="metric-value warn" id="mSpam">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Reclamos</div>
+          <div class="metric-value" id="mReclamos">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Reembolsos</div>
+          <div class="metric-value" id="mReembolsos">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-block">
+      <div class="block-title">Flujo del agente</div>
+      <div class="pipeline">
+        <div class="pipeline-node">
+          <div class="node-circle">1</div>
+          <div>
+            <div class="node-name">Clasificador</div>
+            <div class="node-desc">Determina el tipo de consulta</div>
+          </div>
+        </div>
+        <div class="pipeline-node">
+          <div class="node-circle">2</div>
+          <div>
+            <div class="node-name">Buscador</div>
+            <div class="node-desc">Consulta la política correspondiente</div>
+          </div>
+        </div>
+        <div class="pipeline-node">
+          <div class="node-circle">3</div>
+          <div>
+            <div class="node-name">Redactor</div>
+            <div class="node-desc">Redacta la respuesta al cliente</div>
+          </div>
+        </div>
+        <div class="pipeline-node">
+          <div class="node-circle">4</div>
+          <div>
+            <div class="node-name">Revisor</div>
+            <div class="node-desc">Verifica calidad antes de enviar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-block">
+      <div class="block-title">Categorías</div>
+      <div class="cat-list">
+        <div class="cat-item">
+          <div class="cat-pip" style="background:#dc2626"></div>
+          <span class="cat-label">Reclamo — producto dañado o incorrecto</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-pip" style="background:#d97706"></div>
+          <span class="cat-label">Envío — seguimiento y demoras</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-pip" style="background:#4f46e5"></div>
+          <span class="cat-label">Reembolso — devoluciones</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-pip" style="background:#7c3aed"></div>
+          <span class="cat-label">Técnica — instalación y soporte</span>
+        </div>
+        <div class="cat-item">
+          <div class="cat-pip" style="background:#94a3b8"></div>
+          <span class="cat-label">Spam — mensajes no válidos</span>
+        </div>
+      </div>
+    </div>
+
+
+
+  </aside>
+
+  <main class="main">
+    <div class="chat-area" id="chatArea">
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon">🎧</div>
+        <div class="empty-title">¿En qué podemos ayudarte?</div>
+        <div class="empty-sub">Escribí tu consulta y el sistema de agentes la procesará automáticamente.</div>
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea id="inputMsg" placeholder="Describí tu consulta o problema..." rows="1"></textarea>
+        <div class="input-hint">Enter para enviar · Shift+Enter para nueva línea</div>
+      </div>
+      <button class="btn-send" id="btnSend" onclick="enviar()">↑</button>
+    </div>
+  </main>
+</div>
+
+<script>
+  const API = 'http://127.0.0.1:8000'
+  let stats = { total: 0, spam: 0, reclamos: 0, reembolsos: 0 }
+
+  function setLoading(v) {
+    document.getElementById('progressFill').className = v ? 'progress-fill active' : 'progress-fill'
+    document.getElementById('btnSend').disabled = v
+    document.getElementById('inputMsg').disabled = v
+  }
+
+  function usar(el) {
+    document.getElementById('inputMsg').value = el.textContent
+    document.getElementById('inputMsg').focus()
+  }
+
+  function updateMetrics(cat) {
+    stats.total++
+    if (cat && cat.includes('spam')) stats.spam++
+    if (cat && cat.includes('reclamo')) stats.reclamos++
+    if (cat && cat.includes('reembolso')) stats.reembolsos++
+    document.getElementById('mTotal').textContent = stats.total
+    document.getElementById('mSpam').textContent = stats.spam
+    document.getElementById('mReclamos').textContent = stats.reclamos
+    document.getElementById('mReembolsos').textContent = stats.reembolsos
+  }
+
+  function addMsg(role, texto) {
+    document.getElementById('emptyState')?.remove()
+    const chat = document.getElementById('chatArea')
+    const div = document.createElement('div')
+    div.className = `message ${role}`
+    const label = role === 'user' ? 'vos' : 'agente'
+    const icon = role === 'user' ? '👤' : '🎧'
+    div.innerHTML = `
+      <div class="msg-header">
+        <div class="msg-avatar ${role}">${icon}</div>
+        <span class="msg-role">${label}</span>
+      </div>
+      <div class="msg-bubble">${texto}</div>`
+    chat.appendChild(div)
+    chat.scrollTop = chat.scrollHeight
+    return div
+  }
+
+  function addTyping() {
+    document.getElementById('emptyState')?.remove()
+    const chat = document.getElementById('chatArea')
+    const div = document.createElement('div')
+    div.className = 'message agent'
+    div.innerHTML = `
+      <div class="msg-header">
+        <div class="msg-avatar agent">🎧</div>
+        <span class="msg-role">agente · procesando</span>
+      </div>
+      <div class="msg-bubble">
+        <div class="typing-wrap">
+          <div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div>
+        </div>
+      </div>`
+    chat.appendChild(div)
+    chat.scrollTop = chat.scrollHeight
+    return div
+  }
+
+  async function enviar() {
+    const input = document.getElementById('inputMsg')
+    const texto = input.value.trim()
+    if (!texto) return
+
+    addMsg('user', texto)
+    input.value = ''
+    input.style.height = '46px'
+
+    const typing = addTyping()
+    setLoading(true)
+
+    try {
+      const res = await fetch(`${API}/analizar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mensaje: texto })
+      })
+      if (!res.ok) throw new Error(`Error ${res.status}`)
+      const data = await res.json()
+      typing.remove()
+      addMsg('agent', data.respuesta)
+      updateMetrics(data.categoria)
+    } catch (e) {
+      typing.remove()
+      const chat = document.getElementById('chatArea')
+      const err = document.createElement('div')
+      err.className = 'error-bubble'
+      err.textContent = `error: No se pudo conectar con el servidor. Verificá que esté corriendo.`
+      chat.appendChild(err)
+      chat.scrollTop = chat.scrollHeight
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  document.getElementById('inputMsg').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() }
+  })
+
+  document.getElementById('inputMsg').addEventListener('input', function() {
+    this.style.height = '46px'
+    this.style.height = Math.min(this.scrollHeight, 140) + 'px'
+  })
+</script>
+</body>
+</html>
