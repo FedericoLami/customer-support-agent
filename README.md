@@ -4,6 +4,8 @@ Sistema de atención al cliente construido con **LangGraph** y **Claude AI** que
 
 Pensado para empresas que quieren automatizar su primera línea de atención al cliente usando inteligencia artificial, con respuestas coherentes a su política comercial.
 
+🌐 **Demo en vivo:** https://customer-support-agent-production-4934.up.railway.app
+
 ---
 
 ## Demo
@@ -20,6 +22,8 @@ Pensado para empresas que quieren automatizar su primera línea de atención al 
 | Modelo de lenguaje | Claude Haiku (Anthropic API) |
 | Backend / API REST | FastAPI + Uvicorn |
 | Frontend | HTML · CSS · JavaScript vanilla |
+| Contenedorización | Docker |
+| Despliegue | Railway |
 | Configuración | python-dotenv |
 | Entorno | Python 3.11 + venv |
 
@@ -36,6 +40,7 @@ customer-support-agent/
 │   ├── agente.py          # Construcción y compilación del grafo LangGraph
 │   └── main_api.py        # API REST con FastAPI
 ├── index.html             # Interfaz web
+├── Dockerfile             # Configuración para despliegue en contenedor
 ├── .env                   # Variables de entorno (no se sube a GitHub)
 ├── .gitignore
 ├── requirements.txt
@@ -133,7 +138,15 @@ Recibe una consulta en lenguaje natural y devuelve la respuesta del agente junto
 - Python 3.11
 - API Key de Anthropic ([console.anthropic.com](https://console.anthropic.com))
 
-### Pasos
+### Opción 1 — Acceso directo
+
+El sistema está desplegado y disponible en:
+
+```
+https://customer-support-agent-production-4934.up.railway.app
+```
+
+### Opción 2 — Correr localmente
 
 ```bash
 # 1. Clonar el repositorio
@@ -154,29 +167,23 @@ ANTHROPIC_API_KEY=tu-api-key-aquí
 
 # 5. Iniciar el servidor
 uvicorn src.main_api:app --reload
+
+# 6. Abrir en el navegador
+# http://127.0.0.1:8000
 ```
 
-### Interfaz web
+### Opción 3 — Correr con Docker
 
-Con el servidor corriendo, abrí `index.html` directamente en el navegador.
+```bash
+docker build -t customer-support-agent .
+docker run -p 8000:8000 -e ANTHROPIC_API_KEY=tu-api-key-aquí customer-support-agent
+```
 
 ### Documentación interactiva de la API
 
 ```
-http://127.0.0.1:8000/docs
+https://customer-support-agent-production-4934.up.railway.app/docs
 ```
-
----
-
-## Trabajo futuro
-
-- Conectar la base de conocimiento a una base de datos real para actualizaciones sin tocar el código
-- Agregar autenticación en la API para uso en producción
-- Implementar rate limiting para detección automática de spam por frecuencia de requests
-- Agregar un nodo de escalamiento que derive consultas complejas a un agente humano
-- Persistencia de conversaciones para seguimiento de casos
-
----
 
 ## Autor
 
